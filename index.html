@@ -1,36 +1,36 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8"/>
+  <meta charset="UTF-8">
   <title>Stobix 24h Gainers/Losers</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    *{box-sizing:border-box}body{margin:0;font-family:system-ui;background:#05060a;color:#e5e7eb;min-height:100vh;padding:20px}h1{margin:0;font-size:22px}.container{max-width:1200px;margin:auto}.status{font-size:11px;color:#9ca3af;margin:10px 0}.controls{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0}.ctrl{display:flex;flex-direction:column;gap:4px}label{font-size:10px;text-transform:uppercase;color:#9ca3af}input,.btn{background:#0b0d14;border:1px solid #1f2933;color:#e5e7eb;padding:6px 10px;border-radius:4px;font-size:12px}button{cursor:pointer;background:#1d4ed8}table{width:100%;font-size:12px;margin-top:10px;border-collapse:collapse}th{background:#0f172a;padding:8px;text-align:left;border-bottom:1px solid #1f2933;color:#9ca3af;font-weight:500}td{padding:8px;border-bottom:1px solid #1f2933}tbody tr:hover{background:#1f2933}.green{color:#22c55e}.red{color:#ef4444}.main{display:grid;grid-template-columns:1.4fr 1fr;gap:15px;margin-top:20px}.panel{background:#0b0d14;border:1px solid #1f2933;border-radius:8px;padding:12px}.panel-title{font-size:13px;font-weight:600;text-transform:uppercase;margin-bottom:10px}.summary{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}.summary-item{flex:1;min-width:110px;background:#05060a;border:1px solid #1f2933;padding:8px;border-radius:6px;font-size:10px}.summary-label{text-transform:uppercase;color:#9ca3af;margin-bottom:4px}.summary-value{font-size:13px;font-weight:500}@media(max-width:900px){.main{grid-template-columns:1fr}}
+    *{box-sizing:border-box}body{margin:0;font-family:system-ui;background:#05060a;color:#e5e7eb;padding:20px;min-height:100vh}h1{margin:0 0 8px 0;font-size:20px}.status{font-size:11px;color:#9ca3af;margin:5px 0}.controls{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0}.ctrl{display:flex;flex-direction:column;gap:4px}label{font-size:10px;text-transform:uppercase;color:#9ca3af}input,.btn{background:#0b0d14;border:1px solid #1f2933;color:#e5e7eb;padding:6px 10px;border-radius:4px;font-size:12px}.btn{background:#1d4ed8;cursor:pointer}.main{display:grid;grid-template-columns:1.4fr 1fr;gap:15px;margin-top:20px}table{width:100%;font-size:11px;margin-top:10px;border-collapse:collapse;background:#0b0d14;border-radius:6px;overflow:hidden}th{background:#0f172a;padding:8px;text-align:left;border-bottom:1px solid #1f2933;color:#9ca3af;font-weight:500;font-size:10px}td{padding:8px;border-bottom:1px solid #1f2933}tbody tr:hover{background:#1f2933}.green{color:#22c55e}.red{color:#ef4444}.panel{background:#0b0d14;border:1px solid #1f2933;border-radius:8px;padding:12px}.title{font-size:12px;font-weight:600;text-transform:uppercase;margin-bottom:10px}.summary{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.item{flex:1;min-width:100px;background:#05060a;border:1px solid #1f2933;padding:8px;border-radius:6px;font-size:10px}.label{text-transform:uppercase;color:#9ca3af;margin-bottom:4px}.value{font-size:13px;font-weight:500}@media(max-width:900px){.main{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <div class="container">
+  <div style="max-width:1200px;margin:auto">
     <h1>Stobix Futures 24h Scanner</h1>
-    <div class="status"><span class="green">●</span> <span id="status">Загрузка...</span></div>
+    <div class="status"><span class="green">●</span> <span id="st">Загрузка...</span></div>
     <div class="controls">
-      <div class="ctrl"><label>Топ N</label><input id="top" type="number" min="1" max="100" value="10"/></div>
-      <div class="ctrl"><label>Мин. объём (M USDT)</label><input id="minvol" type="number" min="0" value="1"/></div>
+      <div class="ctrl"><label>Топ</label><input id="top" type="number" min="1" max="100" value="10"/></div>
+      <div class="ctrl"><label>Мин. объём (M USD)</label><input id="minvol" type="number" value="1"/></div>
       <button class="btn" onclick="location.reload()">Обновить</button>
     </div>
 
     <div class="main">
       <div class="panel">
-        <div class="panel-title">Лидеры (Gainers)</div>
-        <table><thead><tr><th>Пара</th><th>Цена</th><th>% 24h</th><th>Объём</th></tr></thead><tbody id="gainers"></tbody></table>
+        <div class="title">Лидеры (Gainers)</div>
+        <table><thead><tr><th>Пара</th><th>Цена</th><th>%24h</th><th>Объём</th></tr></thead><tbody id="gainers"></tbody></table>
       </div>
       <div class="panel">
-        <div class="panel-title">Лузеры (Losers)</div>
-        <table><thead><tr><th>Пара</th><th>Цена</th><th>% 24h</th><th>Объём</th></tr></thead><tbody id="losers"></tbody></table>
+        <div class="title">Лузеры (Losers)</div>
+        <table><thead><tr><th>Пара</th><th>Цена</th><th>%24h</th><th>Объём</th></tr></thead><tbody id="losers"></tbody></table>
         <div class="summary">
-          <div class="summary-item"><div class="summary-label">Всего</div><div class="summary-value" id="total">0</div></div>
-          <div class="summary-item"><div class="summary-label">Макс.+</div><div class="summary-value green" id="maxgain">0%</div></div>
-          <div class="summary-item"><div class="summary-label">Макс.-</div><div class="summary-value red" id="maxloss">0%</div></div>
-          <div class="summary-item"><div class="summary-label">Средн.</div><div class="summary-value" id="avg">0%</div></div>
+          <div class="item"><div class="label">Всего</div><div class="value" id="total">0</div></div>
+          <div class="item"><div class="label">Макс+</div><div class="value green" id="maxg">0%</div></div>
+          <div class="item"><div class="label">Макс-</div><div class="value red" id="maxl">0%</div></div>
+          <div class="item"><div class="label">Средн</div><div class="value" id="avg">0%</div></div>
         </div>
       </div>
     </div>
@@ -38,19 +38,19 @@
 
   <script>
   const PAIRS=["RENDER","STX","FET","WIF","CORE","BONK","PNUT","PEPE","PENGU","S","GALA","LPT","SHIB","IOTA","ALGO","HYPE","LINEA","XPL","STRK","RAY","TIA","GRT","HBAR","LISTA","XRP","TWT","PYTH","FLOKI","IP","POL","INJ","ASTER","ICP","ATOM","FORM","JUP","CAKE","TAO","XLM","ENA","NEAR","AVAX","LINK","ARB","APE","LDO","DOGE","ONDO","WLD","SOL","BNB","ENS","TRUMP","BTC","MNT","SNX","SAND","DASH","ADA","FIL","OP","ETH","APT","SOMI","LTC","PUMP","ETHFI","SUI","FF","EUL","AVNT","SEI","KAITO","WLFI","TON","MASK","TURBO","AAVE","EDEN","0G","IMX","PENDLE","TRX","ENSO","ZEC","BCH","UNI","CRV","DOT","ZEN"];
+  const MAP={RENDER:"render",STX:"stacks",FET:"fetch",WIF:"dogwifcoin",CORE:"core",BONK:"bonk",PNUT:"peanut",PEPE:"pepe",PENGU:"pengu",S:"sora",GALA:"gala",LPT:"livepeer",SHIB:"shiba-inu",IOTA:"iota",ALGO:"algorand",HYPE:"hyperliquid",LINEA:"linea",XPL:"xpla",STRK:"strike",RAY:"raydium",TIA:"celestia",GRT:"the-graph",HBAR:"hedera-hashgraph",LISTA:"lista",XRP:"ripple",TWT:"trust-wallet-token",PYTH:"pyth-network",FLOKI:"floki",IP:"intelliprotocol",POL:"polygon",INJ:"injective-protocol",ASTER:"astar",ICP:"internet-computer",ATOM:"cosmos",FORM:"formation-fi",JUP:"jupiter",CAKE:"pancakeswap-token",TAO:"bittensor",XLM:"stellar",ENA:"ethena",NEAR:"near",AVAX:"avalanche-2",LINK:"chainlink",ARB:"arbitrum",APE:"apecoin",LDO:"lido-dao",DOGE:"dogecoin",ONDO:"ondo-finance",WLD:"world-mobile-token",SOL:"solana",BNB:"binancecoin",ENS:"ethereum-name-service",TRUMP:"maga",BTC:"bitcoin",MNT:"mantle",SNX:"synthetix-network-token",SAND:"the-sandbox",DASH:"dash",ADA:"cardano",FIL:"filecoin",OP:"optimism",ETH:"ethereum",APT:"aptos",SOMI:"sui",LTC:"litecoin",PUMP:"pump-fun",ETHFI:"ether-fi",SUI:"sui",FF:"fei-protocol",EUL:"euler",AVNT:"aventus",SEI:"sei",KAITO:"kaito",WLFI:"walnut-finance",TON:"the-open-network",MASK:"mask-network",TURBO:"turbo-protocol",AAVE:"aave",EDEN:"eden-finance","0G":"0g-labs",IMX:"immutable-x",PENDLE:"pendle",TRX:"tron",ENSO:"enso-finance",ZEC:"zcash",BCH:"bitcoin-cash",UNI:"uniswap",CRV:"curve-dao-token",DOT:"polkadot",ZEN:"horizen"};
   let data=[];
 
   async function load(){
     try{
-      const r=await fetch('https://fapi.binance.com/fapi/v1/ticker/24hr');
+      const ids=Object.values(MAP).join(",");
+      const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true`);
       const m=await r.json();
-      data=m.filter(x=>x.symbol.endsWith('USDT')&&PAIRS.includes(x.symbol.replace('USDT',''))).map(x=({
-        s:x.symbol,p:parseFloat(x.lastPrice),v:parseFloat(x.quoteVolume),c:parseFloat(x.priceChangePercent)
-      }));
-      document.getElementById('status').textContent=`Обновлено: ${new Date().toLocaleTimeString()}`;
+      data=Object.entries(m).map(([id,d])=>{const sym=Object.keys(MAP).find(k=>MAP[k]===id);return {s:sym,p:d.usd||0,v:d.usd_24h_vol||0,c:d.usd_24h_change||0}}).filter(x=>x.s);
+      document.getElementById('st').textContent=`Обновлено: ${new Date().toLocaleTimeString()}`;
       render();
     }catch(e){
-      document.getElementById('status').textContent='Ошибка: '+e.message;
+      document.getElementById('st').textContent='Ошибка: '+e.message;
     }
   }
 
@@ -64,11 +64,11 @@
     const l=f.sort((a,b)=>a.c-b.c).slice(0,top);
     const fmt=(p)=>p>=1?p.toFixed(4):p>=0.01?p.toFixed(6):p.toFixed(8);
     const fv=(v)=>v>=1e9?(v/1e9).toFixed(1)+'B':v>=1e6?(v/1e6).toFixed(1)+'M':(v/1e3).toFixed(0)+'K';
-    document.getElementById('gainers').innerHTML=g.map(x=>`<tr><td>${x.s.replace('USDT','')}</td><td>${fmt(x.p)}</td><td class="green">${x.c>=0?'+':''}${x.c.toFixed(2)}%</td><td>${fv(x.v)}</td></tr>`).join('');
-    document.getElementById('losers').innerHTML=l.map(x=>`<tr><td>${x.s.replace('USDT','')}</td><td>${fmt(x.p)}</td><td class="${x.c>=0?'green':'red'}">${x.c>=0?'+':''}${x.c.toFixed(2)}%</td><td>${fv(x.v)}</td></tr>`).join('');
+    document.getElementById('gainers').innerHTML=g.map(x=>`<tr><td>${x.s}</td><td>$${fmt(x.p)}</td><td class="green">${x.c>=0?'+':''}${x.c.toFixed(2)}%</td><td>${fv(x.v)}</td></tr>`).join('');
+    document.getElementById('losers').innerHTML=l.map(x=>`<tr><td>${x.s}</td><td>$${fmt(x.p)}</td><td class="${x.c>=0?'green':'red'}">${x.c>=0?'+':''}${x.c.toFixed(2)}%</td><td>${fv(x.v)}</td></tr>`).join('');
     const ch=f.map(x=>x.c);
-    document.getElementById('maxgain').textContent=Math.max(...ch).toFixed(2)+'%';
-    document.getElementById('maxloss').textContent=Math.min(...ch).toFixed(2)+'%';
+    document.getElementById('maxg').textContent=Math.max(...ch).toFixed(2)+'%';
+    document.getElementById('maxl').textContent=Math.min(...ch).toFixed(2)+'%';
     document.getElementById('avg').textContent=(ch.reduce((a,b)=>a+b)/ch.length).toFixed(2)+'%';
   }
 
