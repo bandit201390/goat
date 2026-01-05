@@ -2,447 +2,160 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <title>Stobix Futures 24h Gainers/Losers</title>
+  <title>Stobix 24h Scannier</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root {
-      color-scheme: dark;
-      --bg: #05060a;
-      --bg-elevated: #0b0d14;
-      --accent: #3b82f6;
-      --accent-soft: rgba(59,130,246,0.1);
-      --accent-red: #ef4444;
-      --accent-green: #22c55e;
-      --border: #1f2933;
-      --text: #e5e7eb;
-      --text-soft: #9ca3af;
-      --radius-lg: 14px;
-      --radius-sm: 6px;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #020617 0, #020617 40%, #000 100%);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
-      padding: 16px;
-    }
-
-    .app {
-      width: 100%;
-      max-width: 1200px;
-      margin: auto;
-      background: linear-gradient(145deg, rgba(15,23,42,0.96), rgba(2,6,23,0.96));
-      border-radius: 18px;
-      border: 1px solid rgba(148,163,184,0.18);
-      box-shadow:
-        0 24px 80px rgba(15,23,42,0.85),
-        0 0 0 1px rgba(15,23,42,0.8);
-      padding: 18px 18px 20px;
-      backdrop-filter: blur(22px);
-    }
-
-    .app-header {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-
-    .app-title {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      min-width: 0;
-    }
-
-    .app-title-main {
-      font-weight: 600;
-      font-size: 18px;
-      letter-spacing: 0.03em;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-    }
-
-    .badge {
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 999px;
-      border: 1px solid rgba(148,163,184,0.3);
-      color: var(--text-soft);
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-    }
-
-    .app-title-sub {
-      font-size: 12px;
-      color: var(--text-soft);
-      max-width: 480px;
-    }
-
-    .status-line {
-      font-size: 11px;
-      color: var(--text-soft);
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: var(--accent-green);
-      box-shadow: 0 0 0 4px rgba(34,197,94,0.25);
-    }
-
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      justify-content: flex-end;
-    }
-
-    .control-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .control-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--text-soft);
-    }
-
-    .control-input {
-      background: radial-gradient(circle at top left, #020617 0, #020617 40%, #020617 100%);
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(148,163,184,0.35);
-      color: var(--text);
-      font-size: 13px;
-      padding: 5px 8px;
-      min-width: 80px;
-      outline: none;
-    }
-
-    .control-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(59,130,246,0.5);
-    }
-
-    .btn {
-      border-radius: 999px;
-      border: 1px solid rgba(59,130,246,0.55);
-      background: radial-gradient(circle at top, #1d4ed8 0, #1d4ed8 25%, #0f172a 100%);
-      color: #e5ecff;
-      font-size: 12px;
-      padding: 6px 14px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow:
-        0 10px 30px rgba(37,99,235,0.55),
-        0 0 0 1px rgba(15,23,42,0.7);
-    }
-
-    .btn:hover {
-      filter: brightness(1.08);
-    }
-
-    .btn:active {
-      transform: translateY(1px);
-      box-shadow:
-        0 6px 18px rgba(37,99,235,0.50),
-        0 0 0 1px rgba(15,23,42,0.9);
-    }
-
-    .btn-icon {
-      font-size: 13px;
-    }
-
-    .main {
-      margin-top: 4px;
-      display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-      gap: 14px;
-    }
-
-    @media (max-width: 880px) {
-      .app {
-        padding: 14px 12px 16px;
-      }
-      .main {
-        grid-template-columns: minmax(0, 1fr);
-      }
-      .app-header {
-        align-items: flex-start;
-      }
-      .controls {
-        justify-content: flex-start;
-      }
-    }
-
-    .panel {
-      background: radial-gradient(circle at top left, #020617 0, #020617 40%, #020617 100%);
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(31,41,55,0.9);
-      box-shadow:
-        0 16px 40px rgba(15,23,42,0.8),
-        0 0 0 1px rgba(15,23,42,1);
-      padding: 12px 12px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .panel::before {
-      content: "";
-      position: absolute;
-      inset: -140px;
-      opacity: 0.25;
-      background:
-        radial-gradient(circle at top left, rgba(59,130,246,0.09) 0, transparent 60%),
-        radial-gradient(circle at bottom right, rgba(34,197,94,0.08) 0, transparent 55%);
-      pointer-events: none;
-    }
-
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .panel-title {
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: var(--text-soft);
-    }
-
-    .panel-subtitle {
-      font-size: 11px;
-      color: var(--text-soft);
-      margin-top: 2px;
-    }
-
-    .pill {
-      padding: 3px 7px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.9);
-      border: 1px solid rgba(148,163,184,0.4);
-      font-size: 11px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .pill-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #22c55e, #4ade80);
-      box-shadow: 0 0 0 3px rgba(34,197,94,0.4);
-    }
-
-    .table-wrapper {
-      position: relative;
-      z-index: 1;
-      border-radius: 10px;
-      border: 1px solid rgba(31,41,55,1);
-      overflow: hidden;
-      background:
-        radial-gradient(circle at top left, rgba(15,23,42,1) 0, #020617 60%);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-
-    thead {
-      background: linear-gradient(90deg, rgba(15,23,42,1), rgba(15,23,42,0.6));
-    }
-
-    th, td {
-      padding: 6px 8px;
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    th {
-      font-weight: 500;
-      color: var(--text-soft);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      border-bottom: 1px solid rgba(31,41,55,1);
-    }
-
-    th.th-left, td.td-left {
-      text-align: left;
-    }
-
-    td {
-      border-bottom: 1px solid rgba(15,23,42,0.9);
-    }
-
-    tbody tr:nth-child(even) {
-      background: rgba(15,23,42,0.75);
-    }
-
-    tbody tr:nth-child(odd) {
-      background: rgba(15,23,42,0.9);
-    }
-
-    tbody tr:hover {
-      background: rgba(30,64,175,0.55);
-    }
-
-    .change-pos {
-      color: var(--accent-green);
-    }
-
-    .change-neg {
-      color: var(--accent-red);
-    }
-
-    .summary {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .summary-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .summary-block {
-      flex: 1 1 120px;
-      min-width: 0;
-      border-radius: 10px;
-      border: 1px solid rgba(31,41,55,1);
-      background: rgba(15,23,42,0.96);
-      padding: 8px 9px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .summary-label {
-      font-size: 11px;
-      color: var(--text-soft);
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-    }
-
-    .summary-value {
-      font-size: 13px;
-      font-weight: 500;
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-    }
-
-    .summary-note {
-      font-size: 11px;
-      color: var(--text-soft);
-    }
-
-    .hint {
-      font-size: 11px;
-      color: var(--text-soft);
-      position: relative;
-      z-index: 1;
-    }
-
-    .chips-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 4px;
-    }
-
-    .chip {
-      border-radius: 999px;
-      border: 1px solid rgba(148,163,184,0.4);
-      background: rgba(15,23,42,0.9);
-      padding: 3px 8px;
-      font-size: 11px;
-      color: var(--text-soft);
-    }
-
-    .chip-value {
-      color: var(--text);
-      font-weight: 500;
-      margin-left: 4px;
-    }
+    body { margin: 0; font-family: system-ui; background: #05060a; color: #e5e7eb; min-height: 100vh; padding: 20px; }
+    .container { max-width: 1200px; margin: auto; }
+    .header { margin-bottom: 20px; }
+    h1 { margin: 0 0 5px 0; font-size: 24px; }
+    .status { font-size: 12px; color: #9ca3af; margin: 10px 0; }
+    .controls { display: flex; gap: 10px; margin: 15px 0; flex-wrap: wrap; }
+    .control { display: flex; flex-direction: column; gap: 5px; }
+    .control label { font-size: 11px; text-transform: uppercase; color: #9ca3af; }
+    .control input, .btn { background: #0b0d14; border: 1px solid #1f2933; color: #e5e7eb; padding: 8px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; }
+    .btn { background: #1d4ed8; border-color: #3b82f6; }
+    .main { display: grid; grid-template-columns: 1.4fr 1fr; gap: 15px; }
+    .panel { background: #0b0d14; border: 1px solid #1f2933; border-radius: 12px; padding: 15px; }
+    .panel-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; text-transform: uppercase; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { background: #0f172a; padding: 8px; text-align: left; font-weight: 500; color: #9ca3af; border-bottom: 1px solid #1f2933; }
+    td { padding: 8px; border-bottom: 1px solid #1f2933; }
+    tr:hover { background: #1f2933; }
+    .green { color: #22c55e; }
+    .red { color: #ef4444; }
+    .summary { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+    .summary-item { flex: 1; min-width: 120px; background: #05060a; border: 1px solid #1f2933; padding: 10px; border-radius: 8px; font-size: 11px; }
+    .summary-label { color: #9ca3af; text-transform: uppercase; margin-bottom: 5px; }
+    .summary-value { font-size: 14px; font-weight: 500; }
+    @media (max-width: 900px) { .main { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
-  <div class="app">
-    <header class="app-header">
-      <div class="app-title">
-        <div class="app-title-main">
-          Stobix Futures 24h Scanner
-          <span class="badge">STOBIX ONLY</span>
-        </div>
-        <div class="app-title-sub">
-          Топ‑лидеры и лузеры по парам Stobix за 24 часа, данные с Binance Futures API.
-        </div>
-        <div class="status-line">
-          <span class="status-dot"></span>
-          <span id="statusText">Загрузка данных Stobix и Binance...</span>
-        </div>
+  <div class="container">
+    <div class="header">
+      <h1>Stobix Futures 24h Scanner</h1>
+      <div class="status">
+        <span class="green">●</span> <span id="status">Загрузка данных...</span>
       </div>
       <div class="controls">
-        <div class="control-group">
-          <label class="control-label" for="topInput">Топ N</label>
-          <input id="topInput" class="control-input" type="number" min="1" max="100" value="10" />
+        <div class="control">
+          <label for="topN">Топ N</label>
+          <input id="topN" type="number" min="1" max="100" value="10" />
         </div>
-        <div class="control-group">
-          <label class="control-label" for="minVolInput">Мин. объём 24h (USDT)</label>
-          <input id="minVolInput" class="control-input" type="number" min="0" value="1000000" />
+        <div class="control">
+          <label for="minVol">Мин. объём 24h (M USDT)</label>
+          <input id="minVol" type="number" min="0" value="1" />
         </div>
-        <div class="control-group">
-          <label class="control-label">&nbsp;</label>
-          <button id="refreshBtn" class="btn" type="button">
-            <span class="btn-icon">⟳</span> Обновить
-          </button>
+        <div class="control" style="justify-content: flex-end;">
+          <button class="btn" onclick="location.reload()">⟳ Обновить</button>
         </div>
       </div>
-    </header>
+    </div>
 
-    <main class="main">
-      <section class="panel">
-        <div class="panel-
+    <div class="main">
+      <div class="panel">
+        <div class="panel-title">Лидеры (Gainers)</div>
+        <table id="gainersTable">
+          <thead><tr><th>Пара</th><th>Цена</th><th>% (24h)</th><th>Объём 24h</th></tr></thead>
+          <tbody id="gainersBody"></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Лузеры (Losers)</div>
+        <table id="losersTable">
+          <thead><tr><th>Пара</th><th>Цена</th><th>% (24h)</th><th>Объём 24h</th></tr></thead>
+          <tbody id="losersBody"></tbody>
+        </table>
+        <div class="summary">
+          <div class="summary-item"><div class="summary-label">Всего пар</div><div class="summary-value" id="totalPairs">0</div></div>
+          <div class="summary-item"><div class="summary-label">Макс. рост</div><div class="summary-value green" id="maxGain">0%</div></div>
+          <div class="summary-item"><div class="summary-label">Макс. падение</div><div class="summary-value red" id="maxLoss">0%</div></div>
+          <div class="summary-item"><div class="summary-label">Средний %</div><div class="summary-value" id="avgChange">0%</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const stobixPairsUrl = 'https://raw.githubusercontent.com/bandit201390/goat/main/data/stobix-pairs.json';
+    const binanceUrl = 'https://fapi.binance.com/fapi/v1/ticker/24hr';
+    let stobixPairs = [];
+    let allMarkets = [];
+
+    async function loadData() {
+      try {
+        const [pairsRes, marketsRes] = await Promise.all([
+          fetch(stobixPairsUrl),
+          fetch(binanceUrl)
+        ]);
+        const pairsData = await pairsRes.json();
+        stobixPairs = pairsData.pairs.map(p => p.toUpperCase());
+        
+        const marketsData = await marketsRes.json();
+        allMarkets = marketsData
+          .filter(m => m.symbol.endsWith('USDT') && stobixPairs.includes(m.symbol.replace('USDT', '')))
+          .map(m => ({
+            symbol: m.symbol,
+            price: parseFloat(m.lastPrice),
+            volume: parseFloat(m.quoteVolume),
+            change24h: parseFloat(m.priceChangePercent)
+          }));
+        
+        document.getElementById('status').textContent = `Обновлено: ${new Date().toLocaleTimeString()}`;
+        updateTables();
+      } catch (err) {
+        document.getElementById('status').textContent = 'Ошибка загрузки: ' + err.message;
+      }
+    }
+
+    function updateTables() {
+      const topN = Math.max(1, Math.min(100, parseInt(document.getElementById('topN').value)));
+      const minVol = (parseInt(document.getElementById('minVol').value) || 0) * 1_000_000;
+      
+      let filtered = allMarkets.filter(m => m.volume >= minVol);
+      document.getElementById('totalPairs').textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        document.getElementById('gainersBody').innerHTML = '<tr><td colspan="4" style="text-align:center;">Нет данных</td></tr>';
+        document.getElementById('losersBody').innerHTML = '<tr><td colspan="4" style="text-align:center;">Нет данных</td></tr>';
+        return;
+      }
+
+      const gainers = filtered.sort((a, b) => b.change24h - a.change24h).slice(0, topN);
+      const losers = filtered.sort((a, b) => a.change24h - b.change24h).slice(0, topN);
+
+      function formatPrice(p) {
+        if (p >= 1) return p.toFixed(4);
+        if (p >= 0.01) return p.toFixed(6);
+        return p.toFixed(8);
+      }
+
+      function formatVol(v) {
+        if (v >= 1_000_000_000) return (v / 1_000_000_000).toFixed(1) + 'B';
+        if (v >= 1_000_000) return (v / 1_000_000).toFixed(1) + 'M';
+        return (v / 1_000).toFixed(0) + 'K';
+      }
+
+      document.getElementById('gainersBody').innerHTML = gainers.map(m => 
+        `<tr><td>${m.symbol.replace('USDT', '')}</td><td>${formatPrice(m.price)}</td><td class="green">${m.change24h >= 0 ? '+' : ''}${m.change24h.toFixed(2)}%</td><td>${formatVol(m.volume)}</td></tr>`
+      ).join('');
+
+      document.getElementById('losersBody').innerHTML = losers.map(m => 
+        `<tr><td>${m.symbol.replace('USDT', '')}</td><td>${formatPrice(m.price)}</td><td class="${m.change24h >= 0 ? 'green' : 'red'}">${m.change24h >= 0 ? '+' : ''}${m.change24h.toFixed(2)}%</td><td>${formatVol(m.volume)}</td></tr>`
+      ).join('');
+
+      const changes = filtered.map(m => m.change24h);
+      document.getElementById('maxGain').textContent = (Math.max(...changes)).toFixed(2) + '%';
+      document.getElementById('maxLoss').textContent = (Math.min(...changes)).toFixed(2) + '%';
+      document.getElementById('avgChange').textContent = (changes.reduce((a, b) => a + b) / changes.length).toFixed(2) + '%';
+    }
+
+    document.getElementById('topN').addEventListener('input', updateTables);
+    document.getElementById('minVol').addEventListener('input', updateTables);
+
+    loadData();
+  </script>
+</body>
+</html>
