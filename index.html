@@ -14,7 +14,6 @@
     <div class="status"><span class="green">●</span> <span id="st">Готово</span></div>
     <div class="controls">
       <div class="ctrl"><label>Топ</label><input id="top" type="number" min="1" max="100" value="10"/></div>
-      <div class="ctrl"><label>Мин. объём (M USD)</label><input id="minvol" type="number" value="0"/></div>
       <button class="btn" onclick="location.reload()">Обновить</button>
     </div>
 
@@ -49,8 +48,7 @@
 
   function render(){
     const top=Math.max(1,Math.min(100,parseInt(document.getElementById('top').value)));
-    const minvol=(parseInt(document.getElementById('minvol').value)||0)*1e6;
-    let f=data.filter(x=>x.v>=minvol);
+    let f=data.slice);
     document.getElementById('total').textContent=f.length;
     if(!f.length){document.getElementById('gainers').innerHTML='<tr><td colspan=4>-</td></tr>';document.getElementById('losers').innerHTML='<tr><td colspan=4>-</td></tr>';return;}
     const g=f.sort((a,b)=>b.c-a.c).slice(0,top);
@@ -66,8 +64,8 @@
   }
 
   document.getElementById('top').addEventListener('input',render);
-  document.getElementById('minvol').addEventListener('input',render);
   render();
   </script>
 </body>
 </html>
+
