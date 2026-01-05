@@ -48,7 +48,7 @@
 
   function render(){
     const top=Math.max(1,Math.min(100,parseInt(document.getElementById('top').value)));
-    let f=data.slice);
+    let f=data.slice();
     document.getElementById('total').textContent=f.length;
     if(!f.length){document.getElementById('gainers').innerHTML='<tr><td colspan=4>-</td></tr>';document.getElementById('losers').innerHTML='<tr><td colspan=4>-</td></tr>';return;}
     const g=f.sort((a,b)=>b.c-a.c).slice(0,top);
@@ -68,4 +68,5 @@
   </script>
 </body>
 </html>
+
 
