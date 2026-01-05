@@ -39,19 +39,17 @@
 <body>
   <div style="max-width: 1200px; margin: auto">
     <h1>Stobix Futures 24h Scanner</h1>
-    <div class="status"><span class="green" id="status-dot">●</span> <span id="st">Обновлено</span></div>
+    <div class="status"><span class="green" id="status-dot">●</span> <span id="st">Обновление...</span></div>
     <div class="controls">
       <div class="ctrl"><label>Топ</label><input id="top" type="number" min="1" max="100" value="10"/></div>
       <button class="btn" onclick="location.reload()">Обновить</button>
-      <div class="timer"><span id="next-update">Обновление через: 1h</span></div>
+      <div class="timer"><span id="next-update">Загрузка...</span></div>
     </div>
-
     <div class="main">
       <div class="panel">
         <div class="title">Лидеры (Gainers)</div>
         <table><thead><tr><th>Пара</th><th>Цена</th><th>%24h</th><th>Статус</th></tr></thead><tbody id="gainers"></tbody></table>
       </div>
-
       <div class="panel">
         <div class="title">Лузеры (Losers)</div>
         <table><thead><tr><th>Пара</th><th>Цена</th><th>%24h</th><th>Статус</th></tr></thead><tbody id="losers"></tbody></table>
@@ -66,11 +64,25 @@
   </div>
 
   <script>
-    const STOBIX_PAIRS = ["RENDER","STX","FET","WIF","CORE","BONK","PNUT","PEPE","PENGU","GALA","LPT","SHIB","IOTA","ALGO","HYPE","LINEA","XPL","STRK","RAY","TIA","BTC","ETH","SOL","BNB","XRP","SUI","DOGE","LTC","PUMP","ETHFI"];
-    
+    let STOBIX_PAIRS = [];
     let data = [];
     let history = JSON.parse(localStorage.getItem('history')) || {};
     let lastUpdate = Date.now();
+    let nextUpdateTime = 0;
+    let timerInterval = null;
+
+    async function loadPairs() {
+      try {
+        const response = await fetch('./data/stobix-pairs.json');
+        const pairsData = await response.json();
+        STOBIX_PAIRS = pairsData.pairs || [];
+        console.log('Loaded pairs:', STOBIX_PAIRS.length);
+        fetchBinanceData();
+      } catch(e) {
+        console.error('Error loading pairs:', e);
+        document.getElementById('st').textContent = 'Ошибка загрузки пар';
+      }
+    }
 
     async function fetchBinanceData() {
       try {
@@ -81,6 +93,7 @@
         const params = new URLSearchParams({symbols: JSON.stringify(symbols)});
         
         const response = await fetch(`https://api.binance.com/api/v3/ticker/24hr?${params}`);
+        if (!response.ok) throw new Error('API response error');
         const tickers = await response.json();
         
         data = tickers
@@ -92,12 +105,15 @@
           }));
         
         lastUpdate = Date.now();
+        nextUpdateTime = lastUpdate + 3600000;
         document.getElementById('status-dot').textContent = '●';
         document.getElementById('st').textContent = 'Обновлено';
+        
+        if (!timerInterval) startTimer();
         render();
-        updateTimer();
       } catch(e) {
         console.error('API error:', e);
+        document.getElementById('status-dot').textContent = '●';
         document.getElementById('st').textContent = 'Ошибка API';
       }
     }
@@ -106,7 +122,7 @@
       const key = type === 'gainers' ? 'g_' + symbol : 'l_' + symbol;
       const prev = history[key];
       let status = '';
-
+      
       if (prev === undefined) {
         status = '<span class="status-icon new">🆕</span>';
       } else if (changePercent > prev) {
@@ -116,7 +132,6 @@
       } else {
         status = '<span class="status-icon">-</span>';
       }
-
       return status;
     }
 
@@ -124,34 +139,33 @@
       const top = Math.max(1, Math.min(100, parseInt(document.getElementById('top').value)));
       let f = data.slice();
       document.getElementById('total').textContent = f.length;
-
+      
       if (!f.length) {
         document.getElementById('gainers').innerHTML = '<tr><td colspan=4>Ожидание данных...</td></tr>';
         document.getElementById('losers').innerHTML = '<tr><td colspan=4>Ожидание данных...</td></tr>';
         return;
       }
-
+      
       const g = f.sort((a, b) => b.c - a.c).slice(0, top);
       const l = f.sort((a, b) => a.c - b.c).slice(0, top);
-
       const fmt = (p) => p >= 1 ? p.toFixed(4) : p >= 0.01 ? p.toFixed(6) : p.toFixed(8);
-
+      
       document.getElementById('gainers').innerHTML = g.map(x => {
         const status = getStatus(x.s, x.c, 'gainers');
         return `<tr><td>${x.s}</td><td>$${fmt(x.p)}</td><td class="green">${x.c >= 0 ? '+' : ''}${x.c.toFixed(2)}%</td><td>${status}</td></tr>`;
       }).join('');
-
+      
       document.getElementById('losers').innerHTML = l.map(x => {
         const status = getStatus(x.s, x.c, 'losers');
         const color = x.c >= 0 ? 'green' : 'red';
         return `<tr><td>${x.s}</td><td>$${fmt(x.p)}</td><td class="${color}">${x.c >= 0 ? '+' : ''}${x.c.toFixed(2)}%</td><td>${status}</td></tr>`;
       }).join('');
-
+      
       const ch = f.map(x => x.c);
       document.getElementById('maxg').textContent = Math.max(...ch).toFixed(2) + '%';
       document.getElementById('maxl').textContent = Math.min(...ch).toFixed(2) + '%';
       document.getElementById('avg').textContent = (ch.reduce((a, b) => a + b) / ch.length).toFixed(2) + '%';
-
+      
       let newHistory = {...history};
       g.forEach(x => newHistory['g_' + x.s] = x.c);
       l.forEach(x => newHistory['l_' + x.s] = x.c);
@@ -159,20 +173,31 @@
       history = newHistory;
     }
 
-    function updateTimer() {
-      const nextTime = lastUpdate + 3600000;
-      setInterval(() => {
-        const remaining = Math.max(0, nextTime - Date.now());
-        const minutes = Math.floor(remaining / 60000);
+    function startTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      
+      timerInterval = setInterval(() => {
+        const remaining = Math.max(0, nextUpdateTime - Date.now());
+        const hours = Math.floor(remaining / 3600000);
+        const minutes = Math.floor((remaining % 3600000) / 60000);
         const seconds = Math.floor((remaining % 60000) / 1000);
-        document.getElementById('next-update').textContent = `Обновление через: ${minutes}m ${seconds}s`;
         
-        if (remaining === 0) fetchBinanceData();
+        let timeStr = '';
+        if (hours > 0) timeStr = `${hours}h ${minutes}m`;
+        else if (minutes > 0) timeStr = `${minutes}m ${seconds}s`;
+        else timeStr = `${seconds}s`;
+        
+        document.getElementById('next-update').textContent = `Обновление через: ${timeStr}`;
+        
+        if (remaining === 0) {
+          fetchBinanceData();
+        }
       }, 1000);
     }
 
     document.getElementById('top').addEventListener('input', render);
-    fetchBinanceData();
+    
+    loadPairs();
     setInterval(fetchBinanceData, 3600000);
   </script>
 </body>
