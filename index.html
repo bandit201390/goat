@@ -5,11 +5,37 @@
   <title>Stobix 24h Gainers/Losers</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    *{box-sizing:border-box}body{margin:0;font-family:system-ui;background:#05060a;color:#e5e7eb;padding:20px;min-height:100vh}h1{margin:0 0 8px 0;font-size:20px}.status{font-size:11px;color:#9ca3af;margin:5px 0}.controls{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0}.ctrl{display:flex;flex-direction:column;gap:4px}label{font-size:10px;text-transform:uppercase;color:#9ca3af}input,.btn{background:#0b0d14;border:1px solid #1f2933;color:#e5e7eb;padding:6px 10px;border-radius:4px;font-size:12px}.btn{background:#1d4ed8;cursor:pointer}.main{display:grid;grid-template-columns:1.4fr 1fr;gap:15px;margin-top:20px}table{width:100%;font-size:11px;margin-top:10px;border-collapse:collapse;background:#0b0d14;border-radius:6px;overflow:hidden}th{background:#0f172a;padding:8px;text-align:left;border-bottom:1px solid #1f2933;color:#9ca3af;font-weight:500;font-size:10px}td{padding:8px;border-bottom:1px solid #1f2933}tbody tr:hover{background:#1f2933}.green{color:#22c55e}.red{color:#ef4444}.panel{background:#0b0d14;border:1px solid #1f2933;border-radius:8px;padding:12px}.title{font-size:12px;font-weight:600;text-transform:uppercase;margin-bottom:10px}.summary{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.item{flex:1;min-width:100px;background:#05060a;border:1px solid #1f2933;padding:8px;border-radius:6px;font-size:10px}.label{text-transform:uppercase;color:#9ca3af;margin-bottom:4px}.value{font-size:13px;font-weight:500}@media(max-width:900px){.main{grid-template-columns:1fr}}
+    * {box-sizing: border-box}
+    body {margin: 0; font-family: system-ui; background: #05060a; color: #e5e7eb; padding: 20px; min-height: 100vh}
+    h1 {margin: 0 0 8px 0; font-size: 20px}
+    .status {font-size: 11px; color: #9ca3af; margin: 5px 0}
+    .controls {display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0}
+    .ctrl {display: flex; flex-direction: column; gap: 4px}
+    label {font-size: 10px; text-transform: uppercase; color: #9ca3af}
+    input, .btn {background: #0b0d14; border: 1px solid #1f2933; color: #e5e7eb; padding: 6px 10px; border-radius: 4px; font-size: 12px}
+    .btn {background: #1d4ed8; cursor: pointer}
+    .main {display: grid; grid-template-columns: 1.4fr 1fr; gap: 15px; margin-top: 20px}
+    table {width: 100%; font-size: 11px; margin-top: 10px; border-collapse: collapse; background: #0b0d14; border-radius: 6px; overflow: hidden}
+    th {background: #0f172a; padding: 8px; text-align: left; border-bottom: 1px solid #1f2933; color: #9ca3af; font-weight: 500; font-size: 10px}
+    td {padding: 8px; border-bottom: 1px solid #1f2933}
+    tbody tr:hover {background: #1f2933}
+    .green {color: #22c55e}
+    .red {color: #ef4444}
+    .panel {background: #0b0d14; border: 1px solid #1f2933; border-radius: 8px; padding: 12px}
+    .title {font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 10px}
+    .summary {display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px}
+    .item {flex: 1; min-width: 100px; background: #05060a; border: 1px solid #1f2933; padding: 8px; border-radius: 6px; font-size: 10px}
+    .label {text-transform: uppercase; color: #9ca3af; margin-bottom: 4px}
+    .value {font-size: 13px; font-weight: 500}
+    .status-icon {font-weight: bold; font-size: 14px; min-width: 30px}
+    .up {color: #22c55e}
+    .down {color: #ef4444}
+    .new {color: #fbbf24; font-weight: bold}
+    @media(max-width: 900px) {.main {grid-template-columns: 1fr}}
   </style>
 </head>
 <body>
-  <div style="max-width:1200px;margin:auto">
+  <div style="max-width: 1200px; margin: auto">
     <h1>Stobix Futures 24h Scanner</h1>
     <div class="status"><span class="green">●</span> <span id="st">Готово</span></div>
     <div class="controls">
@@ -20,11 +46,12 @@
     <div class="main">
       <div class="panel">
         <div class="title">Лидеры (Gainers)</div>
-        <table><thead><tr><th>Пара</th><th>Цена</th><th>%24h</th><th>Объём</th></tr></thead><tbody id="gainers"></tbody></table>
+        <table><thead><tr><th>Пара</th><th>Цена</th><th>%24h</th><th>Статус</th></tr></thead><tbody id="gainers"></tbody></table>
       </div>
+
       <div class="panel">
         <div class="title">Лузеры (Losers)</div>
-        <table><thead><tr><th>Пара</th><th>Цена</th><th>%24h</th><th>Объём</th></tr></thead><tbody id="losers"></tbody></table>
+        <table><thead><tr><th>Пара</th><th>Цена</th><th>%24h</th><th>Статус</th></tr></thead><tbody id="losers"></tbody></table>
         <div class="summary">
           <div class="item"><div class="label">Всего</div><div class="value" id="total">0</div></div>
           <div class="item"><div class="label">Макс+</div><div class="value green" id="maxg">0%</div></div>
@@ -36,37 +63,70 @@
   </div>
 
   <script>
-  const TESTDATA=[
-    {s:"RENDER",p:2.15,v:450e6,c:16.8},{s:"STX",p:0.36,v:380e6,c:14.6},{s:"FET",p:0.28,v:320e6,c:13.05},{s:"WIF",p:0.40,v:310e6,c:12.3},{s:"CORE",p:0.138,v:290e6,c:12.2},
-    {s:"BONK",p:0.000012,v:280e6,c:9.9},{s:"PNUT",p:0.094,v:270e6,c:9.5},{s:"PEPE",p:0.000057,v:260e6,c:7.97},{s:"PENGU",p:0.0127,v:250e6,c:7.87},{s:"GALA",p:0.0074,v:240e6,c:6.2},
-    {s:"LPT",p:3.35,v:230e6,c:6.17},{s:"SHIB",p:0.000059,v:220e6,c:6.09},{s:"IOTA",p:0.102,v:210e6,c:5.9},{s:"ALGO",p:0.138,v:200e6,c:5.6},{s:"HYPE",p:26.5,v:190e6,c:5.37},
-    {s:"LINEA",p:0.0075,v:180e6,c:5.37},{s:"XPL",p:0.199,v:170e6,c:5.19},{s:"STRK",p:0.091,v:160e6,c:5.19},{s:"RAY",p:1.17,v:150e6,c:5.13},{s:"TIA",p:0.567,v:140e6,c:5.08},
-    {s:"BTC",p:92974,v:5e9,c:1.88},{s:"ETH",p:3187,v:4.5e9,c:1.23},{s:"SOL",p:136.78,v:3e9,c:2.01},{s:"BNB",p:899.52,v:2.5e9,c:1.98},{s:"XRP",p:2.138,v:1.5e9,c:0.82},
-    {s:"SUI",p:1.7,v:1.2e9,c:-0.14},{s:"DOGE",p:0.152,v:900e6,c:2.16},{s:"LTC",p:82.35,v:800e6,c:-0.11},{s:"PUMP",p:0.002312,v:700e6,c:0.0},{s:"ETHFI",p:0.78,v:600e6,c:0.0}
-  ];
-  let data=TESTDATA.slice();
+    const TESTDATA=[{s:"RENDER",p:2.15,v:450e6,c:16.8},{s:"STX",p:0.36,v:380e6,c:14.6},{s:"FET",p:0.28,v:320e6,c:13.05},{s:"WIF",p:0.40,v:310e6,c:12.3},{s:"CORE",p:0.138,v:290e6,c:12.2},{s:"BONK",p:0.000012,v:280e6,c:9.9},{s:"PNUT",p:0.094,v:270e6,c:9.5},{s:"PEPE",p:0.000057,v:260e6,c:7.97},{s:"PENGU",p:0.0127,v:250e6,c:7.87},{s:"GALA",p:0.0074,v:240e6,c:6.2},{s:"LPT",p:3.35,v:230e6,c:6.17},{s:"SHIB",p:0.000059,v:220e6,c:6.09},{s:"IOTA",p:0.102,v:210e6,c:5.9},{s:"ALGO",p:0.138,v:200e6,c:5.6},{s:"HYPE",p:26.5,v:190e6,c:5.37},{s:"LINEA",p:0.0075,v:180e6,c:5.37},{s:"XPL",p:0.199,v:170e6,c:5.19},{s:"STRK",p:0.091,v:160e6,c:5.19},{s:"RAY",p:1.17,v:150e6,c:5.13},{s:"TIA",p:0.567,v:140e6,c:5.08},{s:"BTC",p:92974,v:5e9,c:1.88},{s:"ETH",p:3187,v:4.5e9,c:1.23},{s:"SOL",p:136.78,v:3e9,c:2.01},{s:"BNB",p:899.52,v:2.5e9,c:1.98},{s:"XRP",p:2.138,v:1.5e9,c:0.82},{s:"SUI",p:1.7,v:1.2e9,c:-0.14},{s:"DOGE",p:0.152,v:900e6,c:2.16},{s:"LTC",p:82.35,v:800e6,c:-0.11},{s:"PUMP",p:0.002312,v:700e6,c:0.0},{s:"ETHFI",p:0.78,v:600e6,c:0.0}];
 
-  function render(){
-    const top=Math.max(1,Math.min(100,parseInt(document.getElementById('top').value)));
-    let f=data.slice();
-    document.getElementById('total').textContent=f.length;
-    if(!f.length){document.getElementById('gainers').innerHTML='<tr><td colspan=4>-</td></tr>';document.getElementById('losers').innerHTML='<tr><td colspan=4>-</td></tr>';return;}
-    const g=f.sort((a,b)=>b.c-a.c).slice(0,top);
-    const l=f.sort((a,b)=>a.c-b.c).slice(0,top);
-    const fmt=(p)=>p>=1?p.toFixed(4):p>=0.01?p.toFixed(6):p.toFixed(8);
-    const fv=(v)=>v>=1e9?(v/1e9).toFixed(1)+'B':v>=1e6?(v/1e6).toFixed(1)+'M':(v/1e3).toFixed(0)+'K';
-    document.getElementById('gainers').innerHTML=g.map(x=>`<tr><td>${x.s}</td><td>$${fmt(x.p)}</td><td class="green">${x.c>=0?'+':''}${x.c.toFixed(2)}%</td><td>${fv(x.v)}</td></tr>`).join('');
-    document.getElementById('losers').innerHTML=l.map(x=>`<tr><td>${x.s}</td><td>$${fmt(x.p)}</td><td class="${x.c>=0?'green':'red'}">${x.c>=0?'+':''}${x.c.toFixed(2)}%</td><td>${fv(x.v)}</td></tr>`).join('');
-    const ch=f.map(x=>x.c);
-    document.getElementById('maxg').textContent=Math.max(...ch).toFixed(2)+'%';
-    document.getElementById('maxl').textContent=Math.min(...ch).toFixed(2)+'%';
-    document.getElementById('avg').textContent=(ch.reduce((a,b)=>a+b)/ch.length).toFixed(2)+'%';
-  }
+    let data = TESTDATA.slice();
+    let history = JSON.parse(localStorage.getItem('history')) || {};
 
-  document.getElementById('top').addEventListener('input',render);
-  render();
+    function getStatus(symbol, changePercent, type) {
+      const key = type === 'gainers' ? 'g_' + symbol : 'l_' + symbol;
+      const prev = history[key];
+      let status = '';
+
+      if (prev === undefined) {
+        status = '<span class="status-icon new">🆕</span>';
+      } else if (changePercent > prev) {
+        status = '<span class="status-icon up">▲</span>';
+      } else if (changePercent < prev) {
+        status = '<span class="status-icon down">▼</span>';
+      } else {
+        status = '<span class="status-icon">-</span>';
+      }
+
+      return status;
+    }
+
+    function render() {
+      const top = Math.max(1, Math.min(100, parseInt(document.getElementById('top').value)));
+      let f = data.slice();
+      document.getElementById('total').textContent = f.length;
+
+      if (!f.length) {
+        document.getElementById('gainers').innerHTML = '<tr><td colspan=4>-</td></tr>';
+        document.getElementById('losers').innerHTML = '<tr><td colspan=4>-</td></tr>';
+        return;
+      }
+
+      const g = f.sort((a, b) => b.c - a.c).slice(0, top);
+      const l = f.sort((a, b) => a.c - b.c).slice(0, top);
+
+      const fmt = (p) => p >= 1 ? p.toFixed(4) : p >= 0.01 ? p.toFixed(6) : p.toFixed(8);
+
+      document.getElementById('gainers').innerHTML = g.map(x => {
+        const status = getStatus(x.s, x.c, 'gainers');
+        return `<tr><td>${x.s}</td><td>$${fmt(x.p)}</td><td class="green">${x.c >= 0 ? '+' : ''}${x.c.toFixed(2)}%</td><td>${status}</td></tr>`;
+      }).join('');
+
+      document.getElementById('losers').innerHTML = l.map(x => {
+        const status = getStatus(x.s, x.c, 'losers');
+        const color = x.c >= 0 ? 'green' : 'red';
+        return `<tr><td>${x.s}</td><td>$${fmt(x.p)}</td><td class="${color}">${x.c >= 0 ? '+' : ''}${x.c.toFixed(2)}%</td><td>${status}</td></tr>`;
+      }).join('');
+
+      const ch = f.map(x => x.c);
+      document.getElementById('maxg').textContent = Math.max(...ch).toFixed(2) + '%';
+      document.getElementById('maxl').textContent = Math.min(...ch).toFixed(2) + '%';
+      document.getElementById('avg').textContent = (ch.reduce((a, b) => a + b) / ch.length).toFixed(2) + '%';
+
+      let newHistory = {...history};
+      g.forEach(x => newHistory['g_' + x.s] = x.c);
+      l.forEach(x => newHistory['l_' + x.s] = x.c);
+      localStorage.setItem('history', JSON.stringify(newHistory));
+      history = newHistory;
+    }
+
+    document.getElementById('top').addEventListener('input', render);
+    render();
   </script>
 </body>
 </html>
-
-
