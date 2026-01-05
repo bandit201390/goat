@@ -11,10 +11,10 @@
 <body>
   <div style="max-width:1200px;margin:auto">
     <h1>Stobix Futures 24h Scanner</h1>
-    <div class="status"><span class="green">●</span> <span id="st">Загрузка...</span></div>
+    <div class="status"><span class="green">●</span> <span id="st">Готово</span></div>
     <div class="controls">
       <div class="ctrl"><label>Топ</label><input id="top" type="number" min="1" max="100" value="10"/></div>
-      <div class="ctrl"><label>Мин. объём (M USD)</label><input id="minvol" type="number" value="1"/></div>
+      <div class="ctrl"><label>Мин. объём (M USD)</label><input id="minvol" type="number" value="0"/></div>
       <button class="btn" onclick="location.reload()">Обновить</button>
     </div>
 
@@ -37,22 +37,15 @@
   </div>
 
   <script>
-  const PAIRS=["RENDER","STX","FET","WIF","CORE","BONK","PNUT","PEPE","PENGU","S","GALA","LPT","SHIB","IOTA","ALGO","HYPE","LINEA","XPL","STRK","RAY","TIA","GRT","HBAR","LISTA","XRP","TWT","PYTH","FLOKI","IP","POL","INJ","ASTER","ICP","ATOM","FORM","JUP","CAKE","TAO","XLM","ENA","NEAR","AVAX","LINK","ARB","APE","LDO","DOGE","ONDO","WLD","SOL","BNB","ENS","TRUMP","BTC","MNT","SNX","SAND","DASH","ADA","FIL","OP","ETH","APT","SOMI","LTC","PUMP","ETHFI","SUI","FF","EUL","AVNT","SEI","KAITO","WLFI","TON","MASK","TURBO","AAVE","EDEN","0G","IMX","PENDLE","TRX","ENSO","ZEC","BCH","UNI","CRV","DOT","ZEN"];
-  const MAP={RENDER:"render",STX:"stacks",FET:"fetch",WIF:"dogwifcoin",CORE:"core",BONK:"bonk",PNUT:"peanut",PEPE:"pepe",PENGU:"pengu",S:"sora",GALA:"gala",LPT:"livepeer",SHIB:"shiba-inu",IOTA:"iota",ALGO:"algorand",HYPE:"hyperliquid",LINEA:"linea",XPL:"xpla",STRK:"strike",RAY:"raydium",TIA:"celestia",GRT:"the-graph",HBAR:"hedera-hashgraph",LISTA:"lista",XRP:"ripple",TWT:"trust-wallet-token",PYTH:"pyth-network",FLOKI:"floki",IP:"intelliprotocol",POL:"polygon",INJ:"injective-protocol",ASTER:"astar",ICP:"internet-computer",ATOM:"cosmos",FORM:"formation-fi",JUP:"jupiter",CAKE:"pancakeswap-token",TAO:"bittensor",XLM:"stellar",ENA:"ethena",NEAR:"near",AVAX:"avalanche-2",LINK:"chainlink",ARB:"arbitrum",APE:"apecoin",LDO:"lido-dao",DOGE:"dogecoin",ONDO:"ondo-finance",WLD:"world-mobile-token",SOL:"solana",BNB:"binancecoin",ENS:"ethereum-name-service",TRUMP:"maga",BTC:"bitcoin",MNT:"mantle",SNX:"synthetix-network-token",SAND:"the-sandbox",DASH:"dash",ADA:"cardano",FIL:"filecoin",OP:"optimism",ETH:"ethereum",APT:"aptos",SOMI:"sui",LTC:"litecoin",PUMP:"pump-fun",ETHFI:"ether-fi",SUI:"sui",FF:"fei-protocol",EUL:"euler",AVNT:"aventus",SEI:"sei",KAITO:"kaito",WLFI:"walnut-finance",TON:"the-open-network",MASK:"mask-network",TURBO:"turbo-protocol",AAVE:"aave",EDEN:"eden-finance","0G":"0g-labs",IMX:"immutable-x",PENDLE:"pendle",TRX:"tron",ENSO:"enso-finance",ZEC:"zcash",BCH:"bitcoin-cash",UNI:"uniswap",CRV:"curve-dao-token",DOT:"polkadot",ZEN:"horizen"};
-  let data=[];
-
-  async function load(){
-    try{
-      const ids=Object.values(MAP).join(",");
-      const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true`);
-      const m=await r.json();
-      data=Object.entries(m).map(([id,d])=>{const sym=Object.keys(MAP).find(k=>MAP[k]===id);return {s:sym,p:d.usd||0,v:d.usd_24h_vol||0,c:d.usd_24h_change||0}}).filter(x=>x.s);
-      document.getElementById('st').textContent=`Обновлено: ${new Date().toLocaleTimeString()}`;
-      render();
-    }catch(e){
-      document.getElementById('st').textContent='Ошибка: '+e.message;
-    }
-  }
+  const TESTDATA=[
+    {s:"RENDER",p:2.15,v:450e6,c:16.8},{s:"STX",p:0.36,v:380e6,c:14.6},{s:"FET",p:0.28,v:320e6,c:13.05},{s:"WIF",p:0.40,v:310e6,c:12.3},{s:"CORE",p:0.138,v:290e6,c:12.2},
+    {s:"BONK",p:0.000012,v:280e6,c:9.9},{s:"PNUT",p:0.094,v:270e6,c:9.5},{s:"PEPE",p:0.000057,v:260e6,c:7.97},{s:"PENGU",p:0.0127,v:250e6,c:7.87},{s:"GALA",p:0.0074,v:240e6,c:6.2},
+    {s:"LPT",p:3.35,v:230e6,c:6.17},{s:"SHIB",p:0.000059,v:220e6,c:6.09},{s:"IOTA",p:0.102,v:210e6,c:5.9},{s:"ALGO",p:0.138,v:200e6,c:5.6},{s:"HYPE",p:26.5,v:190e6,c:5.37},
+    {s:"LINEA",p:0.0075,v:180e6,c:5.37},{s:"XPL",p:0.199,v:170e6,c:5.19},{s:"STRK",p:0.091,v:160e6,c:5.19},{s:"RAY",p:1.17,v:150e6,c:5.13},{s:"TIA",p:0.567,v:140e6,c:5.08},
+    {s:"BTC",p:92974,v:5e9,c:1.88},{s:"ETH",p:3187,v:4.5e9,c:1.23},{s:"SOL",p:136.78,v:3e9,c:2.01},{s:"BNB",p:899.52,v:2.5e9,c:1.98},{s:"XRP",p:2.138,v:1.5e9,c:0.82},
+    {s:"SUI",p:1.7,v:1.2e9,c:-0.14},{s:"DOGE",p:0.152,v:900e6,c:2.16},{s:"LTC",p:82.35,v:800e6,c:-0.11},{s:"PUMP",p:0.002312,v:700e6,c:0.0},{s:"ETHFI",p:0.78,v:600e6,c:0.0}
+  ];
+  let data=TESTDATA.slice();
 
   function render(){
     const top=Math.max(1,Math.min(100,parseInt(document.getElementById('top').value)));
@@ -74,7 +67,7 @@
 
   document.getElementById('top').addEventListener('input',render);
   document.getElementById('minvol').addEventListener('input',render);
-  load();
+  render();
   </script>
 </body>
 </html>
