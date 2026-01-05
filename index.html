@@ -1,0 +1,967 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <title>Stobix Gainers/Losers Scanner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #05060a;
+      --bg-elevated: #0b0d14;
+      --accent: #3b82f6;
+      --accent-soft: rgba(59,130,246,0.1);
+      --accent-red: #ef4444;
+      --accent-green: #22c55e;
+      --border: #1f2933;
+      --text: #e5e7eb;
+      --text-soft: #9ca3af;
+      --danger: #ef4444;
+      --radius-lg: 14px;
+      --radius-sm: 6px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #020617 0, #020617 40%, #000 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1200px;
+      margin: auto;
+      background: linear-gradient(145deg, rgba(15,23,42,0.96), rgba(2,6,23,0.96));
+      border-radius: 18px;
+      border: 1px solid rgba(148,163,184,0.18);
+      box-shadow:
+        0 24px 80px rgba(15,23,42,0.85),
+        0 0 0 1px rgba(15,23,42,0.8);
+      padding: 18px 18px 20px;
+      backdrop-filter: blur(22px);
+    }
+
+    .app-header {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .app-title {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .app-title-main {
+      font-weight: 600;
+      font-size: 18px;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.3);
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .app-title-sub {
+      font-size: 12px;
+      color: var(--text-soft);
+      max-width: 420px;
+    }
+
+    .status-line {
+      font-size: 11px;
+      color: var(--text-soft);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent-green);
+      box-shadow: 0 0 0 4px rgba(34,197,94,0.25);
+    }
+
+    .status-tag {
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.3);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .control-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-soft);
+    }
+
+    .control-select,
+    .control-input {
+      background: radial-gradient(circle at top left, #020617 0, #020617 40%, #020617 100%);
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(148,163,184,0.35);
+      color: var(--text);
+      font-size: 13px;
+      padding: 5px 8px;
+      min-width: 120px;
+      outline: none;
+      appearance: none;
+    }
+
+    .control-select:focus,
+    .control-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(59,130,246,0.5);
+    }
+
+    .control-input {
+      width: 76px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid rgba(59,130,246,0.55);
+      background: radial-gradient(circle at top, #1d4ed8 0, #1d4ed8 25%, #0f172a 100%);
+      color: #e5ecff;
+      font-size: 12px;
+      padding: 6px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow:
+        0 10px 30px rgba(37,99,235,0.55),
+        0 0 0 1px rgba(15,23,42,0.7);
+    }
+
+    .btn:hover {
+      filter: brightness(1.08);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+      box-shadow:
+        0 6px 18px rgba(37,99,235,0.50),
+        0 0 0 1px rgba(15,23,42,0.9);
+    }
+
+    .btn-icon {
+      font-size: 13px;
+    }
+
+    .main {
+      margin-top: 4px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 880px) {
+      .app {
+        padding: 14px 12px 16px;
+      }
+      .main {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .app-header {
+        align-items: flex-start;
+      }
+      .controls {
+        justify-content: flex-start;
+      }
+    }
+
+    .panel {
+      background: radial-gradient(circle at top left, #020617 0, #020617 40%, #020617 100%);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(31,41,55,0.9);
+      box-shadow:
+        0 16px 40px rgba(15,23,42,0.8),
+        0 0 0 1px rgba(15,23,42,1);
+      padding: 12px 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: -140px;
+      opacity: 0.25;
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,0.09) 0, transparent 60%),
+        radial-gradient(circle at bottom right, rgba(34,197,94,0.08) 0, transparent 55%);
+      pointer-events: none;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-soft);
+    }
+
+    .panel-subtitle {
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-top: 2px;
+    }
+
+    .pill {
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.4);
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #22c55e, #4ade80);
+      box-shadow: 0 0 0 3px rgba(34,197,94,0.4);
+    }
+
+    .pill-pill {
+      color: var(--text-soft);
+    }
+
+    .table-wrapper {
+      position: relative;
+      z-index: 1;
+      border-radius: 10px;
+      border: 1px solid rgba(31,41,55,0.9);
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top left, rgba(15,23,42,1) 0, #020617 60%);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    thead {
+      background: linear-gradient(90deg, rgba(15,23,42,1), rgba(15,23,42,0.6));
+    }
+
+    th, td {
+      padding: 6px 8px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    th {
+      font-weight: 500;
+      color: var(--text-soft);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      border-bottom: 1px solid rgba(31,41,55,1);
+      cursor: default;
+    }
+
+    th.th-left, td.td-left {
+      text-align: left;
+    }
+
+    td {
+      border-bottom: 1px solid rgba(15,23,42,0.9);
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(15,23,42,0.75);
+    }
+
+    tbody tr:nth-child(odd) {
+      background: rgba(15,23,42,0.9);
+    }
+
+    tbody tr:hover {
+      background: rgba(30,64,175,0.55);
+    }
+
+    .tag-dir {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid rgba(148,163,184,0.4);
+      background: rgba(15,23,42,0.95);
+    }
+
+    .tag-dir.gainer {
+      border-color: rgba(34,197,94,0.6);
+      color: #bbf7d0;
+      background: linear-gradient(135deg, rgba(22,163,74,0.15), rgba(6,78,59,0.9));
+    }
+
+    .tag-dir.loser {
+      border-color: rgba(248,113,113,0.6);
+      color: #fecaca;
+      background: linear-gradient(135deg, rgba(185,28,28,0.18), rgba(67,20,20,0.95));
+    }
+
+    .change-pos {
+      color: var(--accent-green);
+    }
+
+    .change-neg {
+      color: var(--danger);
+    }
+
+    .chip {
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.4);
+      background: rgba(15,23,42,0.9);
+      padding: 3px 8px;
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .chip-value {
+      color: var(--text);
+      font-weight: 500;
+      margin-left: 4px;
+    }
+
+    .summary {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .summary-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .summary-block {
+      flex: 1 1 120px;
+      min-width: 0;
+      border-radius: 10px;
+      border: 1px solid rgba(31,41,55,1);
+      background: rgba(15,23,42,0.96);
+      padding: 8px 9px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .summary-label {
+      font-size: 11px;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .summary-value {
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .summary-note {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .summary-dir-pos {
+      color: var(--accent-green);
+    }
+
+    .summary-dir-neg {
+      color: var(--accent-red);
+    }
+
+    .hint {
+      font-size: 11px;
+      color: var(--text-soft);
+      position: relative;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="app-title">
+        <div class="app-title-main">
+          Stobix Gainers / Losers
+          <span class="badge">EXPERIMENTAL</span>
+        </div>
+        <div class="app-title-sub">
+          Онлайн‑сканер фьючерсов Stobix: настраиваемый таймфрейм (24/12/4/1ч) и быстрый топ гейнеров/лузеров.
+        </div>
+        <div class="status-line">
+          <span class="status-dot"></span>
+          <span>Локальные данные (заглушка) — дальше заменишь на реальный API Stobix.</span>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="control-group">
+          <label class="control-label" for="tfSelect">Таймфрейм</label>
+          <select id="tfSelect" class="control-select">
+            <option value="24h">24 часа</option>
+            <option value="12h">12 часов</option>
+            <option value="4h">4 часа</option>
+            <option value="1h">1 час</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="modeSelect">Режим</label>
+          <select id="modeSelect" class="control-select">
+            <option value="gainers">Gainers</option>
+            <option value="losers">Losers</option>
+            <option value="both">Оба</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="topInput">Топ N</label>
+          <input id="topInput" class="control-input" type="number" min="1" max="50" value="10" />
+        </div>
+        <div class="control-group">
+          <label class="control-label">&nbsp;</label>
+          <button id="refreshBtn" class="btn" type="button">
+            <span class="btn-icon">⟳</span> Обновить
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Таблица рынков</div>
+            <div class="panel-subtitle">
+              Пары отсортированы по изменению цены в выбранном таймфрейме.
+            </div>
+          </div>
+          <div class="pill">
+            <span class="pill-dot"></span>
+            <span class="pill-pill"><span id="pillTf">24h</span> change • <span id="pillMode">Gainers</span></span>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th class="th-left">Пара</th>
+                <th>Цена</th>
+                <th>% изм.</th>
+                <th>TF</th>
+                <th>Объём (24ч)</th>
+                <th>Тип</th>
+              </tr>
+            </thead>
+            <tbody id="marketsBody">
+              <!-- rows via JS -->
+            </tbody>
+          </table>
+        </div>
+        <div class="hint">
+          Подключи сюда реальные данные Stobix (API / прокси), заменив массив <code>markets</code> в JS.
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Сводка</div>
+            <div class="panel-subtitle">
+              Краткий обзор текущего топа по выбранному режиму.
+            </div>
+          </div>
+        </div>
+
+        <div class="summary">
+          <div class="summary-row">
+            <div class="summary-block">
+              <div class="summary-label">Активов в выборке</div>
+              <div class="summary-value">
+                <span id="sumVisible">0</span>
+                <span class="summary-note">из <span id="sumTotal">0</span> загруженных</span>
+              </div>
+            </div>
+            <div class="summary-block">
+              <div class="summary-label">Максимальное изменение</div>
+              <div class="summary-value">
+                <span id="sumMaxChange" class="summary-dir-pos">0.00%</span>
+                <span class="summary-note">в лидере списка</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-row">
+            <div class="summary-block">
+              <div class="summary-label">Среднее изменение</div>
+              <div class="summary-value">
+                <span id="sumAvgChange">0.00%</span>
+              </div>
+              <div class="summary-note">
+                Считается по текущему отфильтрованному списку.
+              </div>
+            </div>
+            <div class="summary-block">
+              <div class="summary-label">Баланс направлений</div>
+              <div class="summary-value">
+                <span class="summary-dir-pos">Gainers: <span id="sumGainers">0</span></span>
+                <span class="summary-dir-neg">Lossers: <span id="sumLosers">0</span></span>
+              </div>
+              <div class="summary-note">
+                Для режима «Оба» показывает общий баланс списка.
+              </div>
+            </div>
+          </div>
+
+          <div class="hint">
+            Этот блок обновляется при каждом пересчёте таблицы, так что можно быстро оценить «настроение» рынка Stobix по выбранному таймфрейму.
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // === ЗАГЛУШЕЧНЫЕ ДАННЫЕ ===
+    // Заменишь на реальные данные из Stobix (fetch + API / твой прокси).
+    const markets = [
+      {
+        symbol: "BONKUSDT",
+        price: 0.0000118,
+        volume_24h: 12500000,
+        change_24h: 19.63,
+        change_12h: 14.20,
+        change_4h: 8.40,
+        change_1h: 2.10
+      },
+      {
+        symbol: "WIFUSDT",
+        price: 0.4025,
+        volume_24h: 9800000,
+        change_24h: 17.86,
+        change_12h: 12.10,
+        change_4h: 6.90,
+        change_1h: 1.80
+      },
+      {
+        symbol: "STXUSDT",
+        price: 0.3567,
+        volume_24h: 7600000,
+        change_24h: 15.66,
+        change_12h: 9.90,
+        change_4h: 5.10,
+        change_1h: 1.20
+      },
+      {
+        symbol: "PNUTUSDT",
+        price: 0.09645,
+        volume_24h: 4200000,
+        change_24h: 15.03,
+        change_12h: 11.10,
+        change_4h: 7.20,
+        change_1h: 2.00
+      },
+      {
+        symbol: "COREUSDT",
+        price: 0.1394,
+        volume_24h: 5500000,
+        change_24h: 14.54,
+        change_12h: 10.20,
+        change_4h: 5.50,
+        change_1h: 1.30
+      },
+      {
+        symbol: "RENDERUSDT",
+        price: 2.083,
+        volume_24h: 7300000,
+        change_24h: 12.72,
+        change_12h: 8.40,
+        change_4h: 3.20,
+        change_1h: 0.80
+      },
+      {
+        symbol: "PEPEUSDT",
+        price: 0.0569950,
+        volume_24h: 15800000,
+        change_24h: 11.83,
+        change_12h: 7.10,
+        change_4h: 4.00,
+        change_1h: 0.90
+      },
+      {
+        symbol: "PENGUUSDT",
+        price: 0.012695,
+        volume_24h: 6100000,
+        change_24h: 10.51,
+        change_12h: 6.80,
+        change_4h: 3.40,
+        change_1h: 0.70
+      },
+      {
+        symbol: "FETUSDT",
+        price: 0.273,
+        volume_24h: 4500000,
+        change_24h: 10.26,
+        change_12h: 6.40,
+        change_4h: 3.10,
+        change_1h: 0.60
+      },
+      {
+        symbol: "SUSDT",
+        price: 0.0920,
+        volume_24h: 3900000,
+        change_24h: 10.18,
+        change_12h: 6.10,
+        change_4h: 2.80,
+        change_1h: 0.55
+      },
+      {
+        symbol: "IOTAUSDT",
+        price: 0.278,
+        volume_24h: 3200000,
+        change_24h: 8.76,
+        change_12h: 4.20,
+        change_4h: 1.80,
+        change_1h: 0.40
+      },
+      {
+        symbol: "GALAUSDT",
+        price: 0.026,
+        volume_24h: 3000000,
+        change_24h: -3.50,
+        change_12h: -2.10,
+        change_4h: -0.80,
+        change_1h: -0.20
+      },
+      {
+        symbol: "SHIBUSDT",
+        price: 0.0000231,
+        volume_24h: 8900000,
+        change_24h: 8.13,
+        change_12h: 5.00,
+        change_4h: 2.40,
+        change_1h: 0.60
+      },
+      {
+        symbol: "FLOKIUSDT",
+        price: 0.000146,
+        volume_24h: 5100000,
+        change_24h: 7.40,
+        change_12h: 4.10,
+        change_4h: 1.60,
+        change_1h: 0.35
+      },
+      {
+        symbol: "BTCUSDT",
+        price: 47850,
+        volume_24h: 185000000,
+        change_24h: 1.80,
+        change_12h: 1.20,
+        change_4h: 0.60,
+        change_1h: 0.25
+      },
+      {
+        symbol: "ETHUSDT",
+        price: 2420,
+        volume_24h: 95000000,
+        change_24h: -1.20,
+        change_12h: -0.80,
+        change_4h: -0.40,
+        change_1h: -0.15
+      }
+    ];
+
+    const tfSelect = document.getElementById("tfSelect");
+    const modeSelect = document.getElementById("modeSelect");
+    const topInput = document.getElementById("topInput");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const marketsBody = document.getElementById("marketsBody");
+
+    const pillTf = document.getElementById("pillTf");
+    const pillMode = document.getElementById("pillMode");
+
+    const sumVisible = document.getElementById("sumVisible");
+    const sumTotal = document.getElementById("sumTotal");
+    const sumMaxChange = document.getElementById("sumMaxChange");
+    const sumAvgChange = document.getElementById("sumAvgChange");
+    const sumGainers = document.getElementById("sumGainers");
+    const sumLosers = document.getElementById("sumLosers");
+
+    function tfKey(tf) {
+      switch (tf) {
+        case "24h":
+          return "change_24h";
+        case "12h":
+          return "change_12h";
+        case "4h":
+          return "change_4h";
+        case "1h":
+          return "change_1h";
+        default:
+          return "change_24h";
+      }
+    }
+
+    function tfLabel(tf) {
+      switch (tf) {
+        case "24h":
+          return "24h";
+        case "12h":
+          return "12h";
+        case "4h":
+          return "4h";
+        case "1h":
+          return "1h";
+        default:
+          return tf;
+      }
+    }
+
+    function modeLabel(mode) {
+      switch (mode) {
+        case "gainers":
+          return "Gainers";
+        case "losers":
+          return "Losers";
+        case "both":
+          return "Gainers & Losers";
+        default:
+          return mode;
+      }
+    }
+
+    function formatPrice(p) {
+      if (p >= 1000) return p.toLocaleString("en-US", { maximumFractionDigits: 0 });
+      if (p >= 1) return p.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (p >= 0.01) return p.toLocaleString("en-US", { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+      return p.toLocaleString("en-US", { minimumFractionDigits: 6, maximumFractionDigits: 8 });
+    }
+
+    function formatPercent(v) {
+      return (v >= 0 ? "+" : "") + v.toFixed(2) + "%";
+    }
+
+    function formatVolume(v) {
+      if (v >= 1_000_000_000) return (v / 1_000_000_000).toFixed(1) + "B";
+      if (v >= 1_000_000) return (v / 1_000_000).toFixed(1) + "M";
+      if (v >= 1_000) return (v / 1_000).toFixed(1) + "K";
+      return v.toString();
+    }
+
+    function computeDirection(change) {
+      if (change > 0) return "gainer";
+      if (change < 0) return "loser";
+      return "flat";
+    }
+
+    function rebuildTable() {
+      const tf = tfSelect.value;
+      const mode = modeSelect.value;
+      const topN = Math.max(1, Math.min(50, Number(topInput.value) || 10));
+      topInput.value = topN;
+
+      const key = tfKey(tf);
+
+      pillTf.textContent = tfLabel(tf);
+      pillMode.textContent = modeLabel(mode);
+
+      // базовая копия
+      let rows = markets.map(m => ({
+        ...m,
+        change: m[key],
+        dir: computeDirection(m[key])
+      }));
+
+      sumTotal.textContent = rows.length.toString();
+
+      // фильтр по режиму
+      if (mode === "gainers") {
+        rows = rows.filter(r => r.dir === "gainer");
+      } else if (mode === "losers") {
+        rows = rows.filter(r => r.dir === "loser");
+      } else {
+        // both: оставляем всё
+      }
+
+      // сортировка
+      rows.sort((a, b) => {
+        if (mode === "losers") {
+          // от наибольшего падения к меньшему, т.е. по возрастанию change
+          return a.change - b.change;
+        }
+        // gainers / both: по убыванию
+        return b.change - a.change;
+      });
+
+      const topRows = rows.slice(0, topN);
+      marketsBody.innerHTML = "";
+
+      let maxChange = null;
+      let sumChange = 0;
+      let countChange = 0;
+      let countGainers = 0;
+      let countLosers = 0;
+
+      topRows.forEach(r => {
+        const tr = document.createElement("tr");
+
+        const tdSymbol = document.createElement("td");
+        tdSymbol.className = "td-left";
+        tdSymbol.textContent = r.symbol;
+
+        const tdPrice = document.createElement("td");
+        tdPrice.textContent = formatPrice(r.price);
+
+        const tdChange = document.createElement("td");
+        tdChange.textContent = formatPercent(r.change);
+        tdChange.className = r.change >= 0 ? "change-pos" : "change-neg";
+
+        const tdTf = document.createElement("td");
+        tdTf.textContent = tfLabel(tf);
+
+        const tdVol = document.createElement("td");
+        tdVol.textContent = formatVolume(r.volume_24h);
+
+        const tdDir = document.createElement("td");
+        const dirSpan = document.createElement("span");
+        if (r.dir === "gainer") {
+          dirSpan.className = "tag-dir gainer";
+          dirSpan.textContent = "Gainer";
+          countGainers++;
+        } else if (r.dir === "loser") {
+          dirSpan.className = "tag-dir loser";
+          dirSpan.textContent = "Loser";
+          countLosers++;
+        } else {
+          dirSpan.className = "tag-dir";
+          dirSpan.textContent = "Flat";
+        }
+        tdDir.appendChild(dirSpan);
+
+        tr.appendChild(tdSymbol);
+        tr.appendChild(tdPrice);
+        tr.appendChild(tdChange);
+        tr.appendChild(tdTf);
+        tr.appendChild(tdVol);
+        tr.appendChild(tdDir);
+
+        marketsBody.appendChild(tr);
+
+        // summary
+        if (maxChange === null) maxChange = r.change;
+        if (mode === "losers") {
+          // при сортировке по возрастанию maxChange — это r.change у первой строки наименьший
+          // но для maxChange нам нужен экстремум по модулю. Возьмём максимум по модулю среди topRows.
+          if (Math.abs(r.change) > Math.abs(maxChange)) {
+            maxChange = r.change;
+          }
+        } else {
+          if (Math.abs(r.change) > Math.abs(maxChange)) {
+            maxChange = r.change;
+          }
+        }
+
+        sumChange += r.change;
+        countChange++;
+      });
+
+      sumVisible.textContent = topRows.length.toString();
+      sumGainers.textContent = countGainers.toString();
+      sumLosers.textContent = countLosers.toString();
+
+      if (maxChange === null) {
+        sumMaxChange.textContent = "0.00%";
+        sumMaxChange.className = "";
+      } else {
+        sumMaxChange.textContent = formatPercent(maxChange);
+        sumMaxChange.className = maxChange >= 0 ? "summary-dir-pos" : "summary-dir-neg";
+      }
+
+      if (countChange === 0) {
+        sumAvgChange.textContent = "0.00%";
+      } else {
+        const avg = sumChange / countChange;
+        sumAvgChange.textContent = formatPercent(avg);
+      }
+    }
+
+    tfSelect.addEventListener("change", rebuildTable);
+    modeSelect.addEventListener("change", rebuildTable);
+    topInput.addEventListener("input", rebuildTable);
+    refreshBtn.addEventListener("click", rebuildTable);
+
+    // первичный рендер
+    rebuildTable();
+  </script>
+</body>
+</html>
